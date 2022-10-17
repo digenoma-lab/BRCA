@@ -1,2 +1,2 @@
 # BRCA
-Nexflow pipeline for processing target BRCA data
+A Nextflow pipeline for processing target NGS BRCA data
