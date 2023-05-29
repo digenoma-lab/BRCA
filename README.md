@@ -3,16 +3,23 @@ A Nextflow pipeline for processing target NGS BRCA data
 
 
 
-## Files needed
+## Input files
+
+Los siguientes archivos son relativos al cluster UOH.
 
 1. reads : /mnt/beegfs/home/adigenova/DiGenomaLab/HRR/gene_focus_analisis/reads
-2. reference genome : 
-3. BRCA1/2 positions : 
+2. reference genome : /mnt/beegfs/labs/DiGenomaLab/databases/references/human/hs38DH.fa 
+3. BRCA1/2 positions :  /mnt/beegfs/labs/DiGenomaLab/HRR/gene_focus_analisis/brca.bed.gz
+4. Annovar database : /mnt/beegfs/home/adigenova/DiGenomaLab/databases/annovar/hg38
+5. Annovar code : /mnt/beegfs/labs/DiGenomaLab/databases/annovar/annovar/table_annovar.pl  
+
+
 
 ## Current pipeline
 
-1. run the genome.mk makefile script which perform genome alignment, quality control, and post processing. 
-The batch script  ***run-genome-pipeline.sh*** under script directory.
+1. run the ***genome.mk*** makefile script which perform genome alignment, quality control, and post processing. 
+The batch script  ***run-genome-pipeline.sh*** under script directory is currently used to submit the job to the cluster.
+
 2. call variants using the following command 
 ```
 # configuration
@@ -50,7 +57,10 @@ table_annovar.pl pool_germline/results/variants/variants.pass.vcf.gz
 		-protocol abraom,avsnp150,clinvar_20220320,dbnsfp42c,ensGene,esp6500siv2_all,exac03,gene4denovo201907,gnomad30_genome,hrcr1,icgc28,intervar_20180118,kaviar_20150923,ljb26_all,mcap,regsnpintron,revel 
 		--codingarg -includesnp -operation f,f,f,f,g,f,f,f,f,f,f,f,f,f,f,f,f   --remove --onetranscript
 ```
- 
-The idea is to automatice all the above steps using nextflow.
+
+## Nextflow pipeline
+The idea is to build a nextflow pipeline to automatize all the above steps.
+
+
 
 
