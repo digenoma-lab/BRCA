@@ -1,8 +1,6 @@
 #!/usr/bin/env nextflow
 
 nextflow.enable.dsl = 2
-
-
 //check some variables before execution
 process PRINT_VERSIONS {
     publishDir "$params.outdir/software", mode: "copy"
@@ -15,13 +13,10 @@ process PRINT_VERSIONS {
     echo "elprep: 5.1.3" >> versions.txt
     echo "fastqc: v0.12.1" >> versions.txt
     echo "qualimap: v.2.2.2-dev" >> versions.txt
-    echo "Strelka: xxx" >> versions.txt
+    echo "Strelka: 2.9.10" >> versions.txt
     echo "Annovar: zzz" >> versions.txt
     """
 }
-
-
-
 process FASTQC {
     tag "$sampleId-mem"
     //label 'process_medium'
@@ -230,6 +225,7 @@ process B2C{
     input:
     tuple val(sampleId), file(bam), file(bai)
     
+    
 
     output:
     tuple val("${sampleId}"), file("${sampleId}.out.cram"), file("${sampleId}.out.cram.crai"), emit: crams
@@ -252,6 +248,64 @@ process B2C{
     samtools flagstats  ${sampleId}.out.cram > ${sampleId}.out.flagstat
     """
     }   
+}
+
+process STRELKA {
+	tag "$sampleId-strelka"
+    publishDir "$params.outdir/strelka", mode: "copy"
+	input:
+	//Input: bam files merged by mergedb process and preproccessed by elprep process 
+	tuple val(sampleId), file(preprocessed_bam), file(bai)
+	output:
+	tuple val(${sampleId}), file("${sampleId}.out.vcf.gz") emit : vcf
+	script:
+    if(params.debug == true){
+    """
+    echo $params.STRELKA_INSTALL_PATH/bin/configureStrelkaGermlineWorkflow.py \
+    --bam $preprocessed_bam \
+    --referenceFasta $params.referenceFasta/hs38DH.fa \
+    --exome \
+    --callRegions $params.BRCA_POSITION/brca.bed.gz \
+    --runDir pool_germline 
+    pool_germline/runWorkflow.py -m local -j 5
+    """}
+    else{
+    """
+    $params.STRELKA_INSTALL_PATH/bin/configureStrelkaGermlineWorkflow.py \
+    --bam $preprocessed_bam \
+    --referenceFasta $params.referenceFasta/hs38DH.fa \
+    --exome \
+    --callRegions $params.BRCA_POSITION/brca.bed.gz \
+    --runDir pool_germline 
+    pool_germline/runWorkflow.py -m local -j 5
+    """
+    }
+}
+process ANNOVAR{
+    tag "$sampleId-annovar"
+    publishDir "$params.outdir/annovar", mode: "copy"
+    input:
+    tuple val(sampleId), file(results_strelka.vcf.gz)
+    output:
+    file("${sampleId}.out.vcf")
+    if (params.debug == true){
+        //results_strelka.vcf.gz = $params.output/strelka/pool_germline/results/variants/variants.pass.vcf.gz 
+        """
+        echo $params.ANNOVAR_CODE/table_annovar.pl 
+		$params.ANNOVAR_DB/databases/annovar/hg38 -out ${sampleId}-annovar_annot 
+		-nastring . -vcfinput --buildver hg38  
+		-protocol abraom,avsnp150,clinvar_20220320,dbnsfp42c,ensGene,esp6500siv2_all,exac03,gene4denovo201907,gnomad30_genome,hrcr1,icgc28,intervar_20180118,kaviar_20150923,ljb26_all,mcap,regsnpintron,revel 
+		--codingarg -includesnp -operation f,f,f,f,g,f,f,f,f,f,f,f,f,f,f,f,f   --remove --onetranscript
+        """
+    }
+    else{
+        """$params.ANNOVAR_CODE/table_annovar.pl 
+		$params.ANNOVAR_DB/databases/annovar/hg38 -out ${sampleId}-annovar_annot 
+		-nastring . -vcfinput --buildver hg38  
+		-protocol abraom,avsnp150,clinvar_20220320,dbnsfp42c,ensGene,esp6500siv2_all,exac03,gene4denovo201907,gnomad30_genome,hrcr1,icgc28,intervar_20180118,kaviar_20150923,ljb26_all,mcap,regsnpintron,revel 
+		--codingarg -includesnp -operation f,f,f,f,g,f,f,f,f,f,f,f,f,f,f,f,f   --remove --onetranscript
+        """
+    }
 }
 
 
