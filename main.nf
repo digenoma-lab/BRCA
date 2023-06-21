@@ -2,6 +2,7 @@
 
 nextflow.enable.dsl = 2
 //check some variables before execution
+
 process PRINT_VERSIONS {
     publishDir "$params.outdir/software", mode: "copy"
 
@@ -27,7 +28,8 @@ process FASTQC {
 
     output:
     path("${sampleId}-${part}.fastqc"), emit: fqc 
-
+	
+   
     script:
     if(params.debug == true){
     """
@@ -39,7 +41,7 @@ process FASTQC {
     } else{
     """
     mkdir -p ${sampleId}-${part}.fastqc
-    fastqc -t $task.cpus -o ${sampleId}-${part}.fastqc $read1 $read2
+    fastqc -t $task.cpus -o ${sampleId}-${part}.fastqc $reads
     """
     }
     
@@ -146,9 +148,9 @@ process ELPREP {
      tuple val(sampleId), file(bam)
     output:
     tuple val("${sampleId}"), file("${sampleId}.out.bam"), file("${sampleId}.out.bam.bai"), emit: bams
-    //path("${sampleId}.out.bam.bai") , emit : bindex
-    path("${sampleId}.output.metrics"), emit : metrics
-    path("${sampleId}.output.recal"), optional: true
+    path("${sampleId}.out.bam.bai") , emit : bindex
+    /*path("${sampleId}.output.metrics"), emit : metrics
+    path("${sampleId}.output.recal"), optional: true*/
 
     script:
     
@@ -156,7 +158,7 @@ process ELPREP {
     """
     echo elprep sfm ${bam} ${sampleId}.out.bam --mark-duplicates --mark-optical-duplicates ${sampleId}.output.metrics \\
         --sorting-order coordinate \\
-        --bqsr  ${sampleId}.output.recal --known-sites ${params.dbsnp},${params.dbindel} \\
+        --bqsr ${sampleId}.output.recal --known-sites ${params.dbsnp},${params.dbindel} \\
         --reference ${params.elpre_ref}  --nr-of-threads $task.cpus
     echo samtools index ${sampleId}.out.bam
     #output files
@@ -249,87 +251,87 @@ process B2C{
     """
     }   
 }
-
-process STRELKA {
+process STRELKA{
 	tag "$sampleId-strelka"
-    publishDir "$params.outdir/strelka", mode: "copy"
+	publishDir "$params.outdir/strelka", mode : "copy"
 	input:
-	//Input: bam files merged by mergedb process and preproccessed by elprep process 
+	//Input: bam files merged by mergedb process and preprocessed by elprep process
 	tuple val(sampleId), file(preprocessed_bam), file(bai)
 	output:
-	tuple val(${sampleId}), file("${sampleId}.out.vcf.gz") emit : vcf
+	//Germnline analisis return variants.vcf.gz and
+      	tuple val("${sampleId}"), file("${sampleId}.pass.variants.gz"), emit: vcfs
 	script:
-    if(params.debug == true){
-    """
-    echo $params.STRELKA_INSTALL_PATH/bin/configureStrelkaGermlineWorkflow.py \
-    --bam $preprocessed_bam \
-    --referenceFasta $params.referenceFasta/hs38DH.fa \
-    --exome \
-    --callRegions $params.BRCA_POSITION/brca.bed.gz \
-    --runDir pool_germline 
-    pool_germline/runWorkflow.py -m local -j 5
-    """}
-    else{
-    """
-    $params.STRELKA_INSTALL_PATH/bin/configureStrelkaGermlineWorkflow.py \
-    --bam $preprocessed_bam \
-    --referenceFasta $params.referenceFasta/hs38DH.fa \
-    --exome \
-    --callRegions $params.BRCA_POSITION/brca.bed.gz \
-    --runDir pool_germline 
-    pool_germline/runWorkflow.py -m local -j 5
-    """
-    }
+	if (params.debug == true){
+		"""
+		echo
+		${params.STRELKA_INSTALL_PATH}/bin/configureStrelkaGermlineWorkflow.py\
+		--bam $preprocessed_bam \
+		--referenceFasta ${params.REFERENCE_FASTA}\
+		--exome \
+		--callRegions ${params.BRCA_POSITION} \
+		--runDir ./pool_germine 
+		pool_germline/runWorkflow.py -m local -j 5
+		"""
+	}
+	else{
+		"""
+		${params.STRELKA_INSTALL_PATH}/bin/configureStrelkaGermlineWorkflow.py\
+                --bam $preprocessed_bam \
+                --referenceFasta ${params.REFERENCE_FASTA}\
+                --exome \
+                --callRegions ${params.BRCA_POSITION} \
+                --runDir ./pool_germine
+                pool_germline/runWorkflow.py -m local -j 5
+                """
+
+	}
+	
 }
 process ANNOVAR{
-    tag "$sampleId-annovar"
-    publishDir "$params.outdir/annovar", mode: "copy"
-    input:
-    tuple val(sampleId), file(results_strelka.vcf.gz)
-    output:
-    file("${sampleId}.out.vcf")
-    if (params.debug == true){
-        //results_strelka.vcf.gz = $params.output/strelka/pool_germline/results/variants/variants.pass.vcf.gz 
-        """
-        echo $params.ANNOVAR_CODE/table_annovar.pl 
-		$params.ANNOVAR_DB/databases/annovar/hg38 -out ${sampleId}-annovar_annot 
-		-nastring . -vcfinput --buildver hg38  
-		-protocol abraom,avsnp150,clinvar_20220320,dbnsfp42c,ensGene,esp6500siv2_all,exac03,gene4denovo201907,gnomad30_genome,hrcr1,icgc28,intervar_20180118,kaviar_20150923,ljb26_all,mcap,regsnpintron,revel 
-		--codingarg -includesnp -operation f,f,f,f,g,f,f,f,f,f,f,f,f,f,f,f,f   --remove --onetranscript
-        """
-    }
-    else{
-        """$params.ANNOVAR_CODE/table_annovar.pl 
-		$params.ANNOVAR_DB/databases/annovar/hg38 -out ${sampleId}-annovar_annot 
-		-nastring . -vcfinput --buildver hg38  
-		-protocol abraom,avsnp150,clinvar_20220320,dbnsfp42c,ensGene,esp6500siv2_all,exac03,gene4denovo201907,gnomad30_genome,hrcr1,icgc28,intervar_20180118,kaviar_20150923,ljb26_all,mcap,regsnpintron,revel 
-		--codingarg -includesnp -operation f,f,f,f,g,f,f,f,f,f,f,f,f,f,f,f,f   --remove --onetranscript
-        """
-    }
+	tag "$sampleId-annovar"
+        publishDir "$params.outdir/annovar", mode: "copy"
+	input:
+	tuple val (sampleId), file(results_strelka) 
+        output:
+        tuple val("${sampleId}"), file ("${sampleId}.vcf"), emit : vcf
+        script:
+        if (params.debug == true){
+                """
+                echo
+                $params.ANNOVAR_CODE/table_annovar.pl $results_strelka
+                $params.ANNOVAR_DB/hg38 -out ${sampleId}_annovar_annot
+                -nastring . -vcfinput --buildver hg38
+                -protocol abraom,avsnp150,clinvar_20220320,dbnsfp42c,ensGene,esp6500siv2_all,exac03,gene4denovo201907,gnomad30_genome,hrcr1,icgc28,intervar_20180118,kaviar_20150923,ljb26_all,mcap,regsnpintron,revel
+                --codingarg -includesnp -operation f,f,f,f,g,f,f,f,f,f,f,f,f,f,f,f,f   --remove --onetranscript
+                """
+	}
+	else{
+		"""
+                $params.ANNOVAR_CODE/table_annovar.pl $results_strelka
+                $params.ANNOVAR_DB/hg38 -out ${sampleId}_annovar_annot
+                -nastring . -vcfinput --buildver hg38
+                -protocol abraom,avsnp150,clinvar_20220320,dbnsfp42c,ensGene,esp6500siv2_all,exac03,gene4denovo201907,gnomad30_genome,hrcr1,icgc28,intervar_20180118,kaviar_20150923,ljb26_all,mcap,regsnpintron,revel
+                --codingarg -includesnp -operation f,f,f,f,g,f,f,f,f,f,f,f,f,f,f,f,f   --remove --onetranscript
+                """
+	}
+	
 }
-
-
-
-
-
-//we declare the workflow for index
-
 workflow {
     // TODO do a parameter check
     PRINT_VERSIONS()
     //we read pairs from regex 
-    if(params.reads != null){
-    // --reads "./reads/B087*.merge.{1,2}.fq.gz"
-    read_pairs_ch = channel.fromFilePairs(params.reads)
+    if(params.reads!=null){
+    
+    reads= "${params.reads}" + "/*.R{1,2}.fastq.gz*"
+    read_pairs_ch = Channel.fromFilePairs(reads)
     }else if(params.csv != null){
     //we reads pairs from csv
     read_pairs_ch=Channel.fromPath(params.csv) \
         | splitCsv(header:true) \
-        | map { row-> tuple(row.sampleId, row.part,  file(row.read1), file(row.read2)) }
+        | map { row-> tuple(row.sampleId, row.part,  file(row.read1), file(row.read2))}\
     }else{
         println "Error: reads regex or path"
     }
-
     read_pairs_ch.view()
     //ref = path(params.ref)
     //fastqc read quality
@@ -350,7 +352,6 @@ workflow {
     // Strelka to call variants
     STRELKA(ELPREP.out.bams)
     // Annovar to annotate variatns
-    ANNOVAR(STRELKA.vcf)
-    // Automatic report with multiqc 
-    MULTIQC(all_files)
+    ANNOVAR(STRELKA.out.vcfs)
+    //MULTIQC(all_files)
 }
