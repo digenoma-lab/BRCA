@@ -258,8 +258,9 @@ process STRELKA{
 	//Input: bam files merged by mergedb process and preprocessed by elprep process
 	tuple val(sampleId), file(preprocessed_bam), file(bai)
 	output:
-	//Germnline analisis return variants.vcf.gz and
-      	tuple val("${sampleId}"), file("${sampleId}.pass.variants.gz"), emit: vcfs
+	//Germnline analysis 
+      	tuple val("${sampleId}"), file("genome.${sampleId}.vcf.gz"), file("genome.${sampleId}.vcf.gz.tbi"), emit: genom
+	tuple file("variants.vcf.gz"), file("variants.vcf.gz.tbi"), emit: variants
 	script:
 	if (params.debug == true){
 		"""
@@ -287,18 +288,20 @@ process STRELKA{
 	}
 	
 }
+
 process ANNOVAR{
 	tag "$sampleId-annovar"
         publishDir "$params.outdir/annovar", mode: "copy"
 	input:
-	tuple val (sampleId), file(results_strelka) 
+	tuple file(gz), file(tbi) 
         output:
-        tuple val("${sampleId}"), file ("${sampleId}.vcf"), emit : vcf
+        tuple file("*multianno*.vcf"), file ("*multianno*.txt"), emit: multianno
+	file ("*.avinput")
         script:
         if (params.debug == true){
                 """
                 echo
-                $params.ANNOVAR_CODE/table_annovar.pl $results_strelka
+                $params.ANNOVAR_CODE/table_annovar.pl $gz
                 $params.ANNOVAR_DB/hg38 -out ${sampleId}_annovar_annot
                 -nastring . -vcfinput --buildver hg38
                 -protocol abraom,avsnp150,clinvar_20220320,dbnsfp42c,ensGene,esp6500siv2_all,exac03,gene4denovo201907,gnomad30_genome,hrcr1,icgc28,intervar_20180118,kaviar_20150923,ljb26_all,mcap,regsnpintron,revel
@@ -352,6 +355,6 @@ workflow {
     // Strelka to call variants
     STRELKA(ELPREP.out.bams)
     // Annovar to annotate variatns
-    ANNOVAR(STRELKA.out.vcfs)
+    ANNOVAR(STRELKA.out.variants)
     //MULTIQC(all_files)
 }
