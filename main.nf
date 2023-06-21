@@ -149,8 +149,8 @@ process ELPREP {
     output:
     tuple val("${sampleId}"), file("${sampleId}.out.bam"), file("${sampleId}.out.bam.bai"), emit: bams
     path("${sampleId}.out.bam.bai") , emit : bindex
-    /*path("${sampleId}.output.metrics"), emit : metrics
-    path("${sampleId}.output.recal"), optional: true*/
+    path("${sampleId}.output.metrics"), emit : metrics
+    path("${sampleId}.output.recal"), optional: true
 
     script:
     
@@ -302,7 +302,7 @@ process ANNOVAR{
                 """
                 echo
                 $params.ANNOVAR_CODE/table_annovar.pl $gz
-                $params.ANNOVAR_DB/hg38 -out ${sampleId}_annovar_annot
+                $params.ANNOVAR_DB/hg38 -out annovar_annot
                 -nastring . -vcfinput --buildver hg38
                 -protocol abraom,avsnp150,clinvar_20220320,dbnsfp42c,ensGene,esp6500siv2_all,exac03,gene4denovo201907,gnomad30_genome,hrcr1,icgc28,intervar_20180118,kaviar_20150923,ljb26_all,mcap,regsnpintron,revel
                 --codingarg -includesnp -operation f,f,f,f,g,f,f,f,f,f,f,f,f,f,f,f,f   --remove --onetranscript
@@ -310,8 +310,8 @@ process ANNOVAR{
 	}
 	else{
 		"""
-                $params.ANNOVAR_CODE/table_annovar.pl $results_strelka
-                $params.ANNOVAR_DB/hg38 -out ${sampleId}_annovar_annot
+                $params.ANNOVAR_CODE/table_annovar.pl $gz
+                $params.ANNOVAR_DB/hg38 -out annovar_annot
                 -nastring . -vcfinput --buildver hg38
                 -protocol abraom,avsnp150,clinvar_20220320,dbnsfp42c,ensGene,esp6500siv2_all,exac03,gene4denovo201907,gnomad30_genome,hrcr1,icgc28,intervar_20180118,kaviar_20150923,ljb26_all,mcap,regsnpintron,revel
                 --codingarg -includesnp -operation f,f,f,f,g,f,f,f,f,f,f,f,f,f,f,f,f   --remove --onetranscript
