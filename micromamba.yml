@@ -11,4 +11,3 @@ dependencies:
   - qualimap=2.2.2a
   - fastqc=0.12.1
   - multiqc=1.14
-  - strelka2=2.9.10
