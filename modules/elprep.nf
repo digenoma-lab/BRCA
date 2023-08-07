@@ -15,7 +15,7 @@ process ELPREP {
     path("${sampleId}.output.recal"), optional: true
 
     script:
-    
+
     if(params.debug == true){
     	"""
     	echo elprep sfm ${bam} ${sampleId}.out.bam --mark-duplicates --mark-optical-duplicates ${sampleId}.output.metrics \\

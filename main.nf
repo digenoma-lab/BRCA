@@ -10,7 +10,8 @@ include {MERGEB} from './modules/mergeb'
 include {ELPREP} from './modules/elprep'
 include {QUALIMAP} from './modules/qualimap'
 include {B2C} from './modules/b2c'
-include {STRELKA} from './modules/strelka'
+include {STRELKA_ONESAMPLE} from './modules/strelka'
+//include {STRELKA_ONESAMPLE} from './modules/strelka'
 include {ANNOVAR} from './modules/annovar'
 
 process PRINT_VERSIONS {
@@ -28,15 +29,12 @@ process PRINT_VERSIONS {
     echo "Annovar: zzz" >> versions.txt
     """
 }
-	
+
 workflow {
     // TODO do a parameter check
     PRINT_VERSIONS()
-    //we read pairs from regex 
-    if(params.reads!=null){   
-    reads= "${params.reads}" + "/*.R{1,2}.fastq.gz*"
-    read_pairs_ch = Channel.fromFilePairs(reads)
-    }else if(params.csv != null){
+    //we read pairs from regex
+    if(params.csv != null){
     //we reads pairs from csv
     read_pairs_ch=Channel.fromPath(params.csv) \
         | splitCsv(header:true) \
@@ -44,7 +42,9 @@ workflow {
     }else{
         println "Error: reads regex or path"
     }
-    read_pairs_ch.view()
+
+
+    //read_pairs_ch.view()
     //ref = path(params.ref)
     //fastqc read quality
     FASTQC(read_pairs_ch)
@@ -52,7 +52,9 @@ workflow {
     BWAMEM(read_pairs_ch)
     //we do merge the bams by sample ID
     groups=BWAMEM.out.bams.groupTuple(by: 0)
+
     //groups.view()
+
     MERGEB(groups)
     //MERGEB.out.mbams.view()
     //bam procesisng sort/duplciates/bqrs
@@ -62,8 +64,17 @@ workflow {
     //BAM->CRAM conversion
     B2C(ELPREP.out.bams)
     // Strelka to call variants
-    STRELKA(ELPREP.out.bams)
+    //if(params.onesample){
+    STRELKA_ONESAMPLE(ELPREP.out.bams)
+    //}else{
+      //pool sample
+    //ELPREP.out.bams.view()
+    pool=ELPREP.out.bams.collect()
+    pool.view()
+      //STRELKA_POOL(pool)
+    //}
+    //STRELKA(ELPREP.out.bams)
     // Annovar to annotate variatns
-    ANNOVAR(STRELKA.out.variants)
+    //ANNOVAR(STRELKA.out.variants)
     //MULTIQC(all_files)
 }

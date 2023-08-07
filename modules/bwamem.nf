@@ -1,6 +1,6 @@
 //we do run bwa-mem2 or bwa-mem
 process BWAMEM {
-    
+
     tag "$sampleId-mem"
     //label 'process_high'
     publishDir "$params.outdir/BWA", mode: "copy", pattern: '*.log.*'
@@ -11,16 +11,16 @@ process BWAMEM {
 
     output:
     tuple val("${sampleId}"), val("${part}"), file("${sampleId}-${part}.aln.bam"), emit: bams
-    path("${sampleId}-${part}.log.bwamem") 
+    path("${sampleId}-${part}.log.bwamem")
     path("${sampleId}-${part}.hla.all") , optional: true
     path("${sampleId}-${part}.log.hla") , optional: true
- 
+
    script:
-    def aln="bwa-mem2" 
+    def aln="bwa-mem2"
     //we define the aln tool
     if(params.aligner=="bwa"){
 	aln="bwa"
-    }	
+    }
     if(params.debug == true){
     	"""
     	echo "seqtk mergepe $read1 $read2 | ${aln} mem -p -t $task.cpus -R'@RG\\tID:${sampleId}-${part}\\tSM:${sampleId}\\tPL:ill' ${params.ref} - 2> ${sampleId}-${part}.log.bwamem | k8 ${params.alt_js} -p ${sampleId}-${part}.hla ${params.ref}.alt | samtools view -1 - > ${sampleId}-${part}.aln.bam"
@@ -48,16 +48,15 @@ process BWAMEM {
   		| ${aln} mem -p -t $task.cpus  -R'@RG\\tID:${sampleId}-${part}\\tSM:${sampleId}\\tPL:ill' ${params.ref} - 2> ${sampleId}-${part}.log.bwamem \\
   		| k8 ${params.alt_js} -p ${sampleId}-${part}.hla hs38DH.fa.alt \\
   		| samtools view -1 - > ${sampleId}-${part}.aln.bam
-     	"""	
+     	"""
     }else{
 	//normal mapping mode
      	"""
 	seqtk mergepe $read1 $read2 \\
   	| ${aln} mem -p -t $task.cpus  -R'@RG\\tID:${sampleId}-${part}\\tSM:${sampleId}\\tPL:ill' ${params.ref} - 2> ${sampleId}-${part}.log.bwamem \\
         | samtools view -1 - > ${sampleId}-${part}.aln.bam
-     	"""	
+     	"""
     }
   }
 
 }
-

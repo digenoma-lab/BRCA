@@ -1,16 +1,16 @@
 process QUALIMAP{
     tag "$sampleId-qualimap"
     //label 'process_medium'
-    
+
     publishDir "$params.outdir/QC/QUALIMAP", mode: "copy"
 
     input:
     tuple val(sampleId), file(bam), file(bai)
-    
+
 
     output:
     path("${sampleId}.qualimap") , emit : qc
-    
+
     script:
     if(params.debug == true){
     	"""
