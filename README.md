@@ -2,6 +2,12 @@
 A Nextflow pipeline for processing target NGS BRCA data
 
 
+## Dry run
+
+```
+nextflow run main.nf --csv test.csv --debug true --outdir results 
+```
+
 
 ## Input files
 
