@@ -11,7 +11,7 @@ include {ELPREP} from './modules/elprep'
 include {QUALIMAP} from './modules/qualimap'
 include {B2C} from './modules/b2c'
 include {STRELKA_ONESAMPLE} from './modules/strelka'
-//include {STRELKA_ONESAMPLE} from './modules/strelka'
+include {STRELKA_POOL} from './modules/strelka'
 include {ANNOVAR} from './modules/annovar'
 
 process PRINT_VERSIONS {
@@ -63,15 +63,38 @@ workflow {
     QUALIMAP(ELPREP.out.bams)
     //BAM->CRAM conversion
     B2C(ELPREP.out.bams)
+
+
     // Strelka to call variants
-    //if(params.onesample){
+    // ELPREP.out.bams.view()
     STRELKA_ONESAMPLE(ELPREP.out.bams)
-    //}else{
-      //pool sample
+    // STRELKA_POOL(bams)
+
+    bams = ELPREP.out.bams.map {it -> it[1]}.collect()
+    samples = ELPREP.out.bams.map {it -> [it[0]]}.collect().flatten()
+    samples.view()
+    STRELKA_POOL(bams, samples)
+  
+    
     //ELPREP.out.bams.view()
-    pool=ELPREP.out.bams.collect()
-    pool.view()
-      //STRELKA_POOL(pool)
+    // todo = samples.map{it -> tuple(it, samples)}
+    // todo.view()
+    // bams = ELPREP.out.bams.toList()
+    // bams.view()
+    // bams.view()
+    // ELPREP.out.bams.map{i->[i[0], bams]}set{pool}
+    // // pool.map{it -> [file(it[1])]}.set{pool_bams}
+    // pool.view()
+    // pool.map{ it -> [it[0], (pool_bams)]}.set{pool}
+    // pool.view()
+ 
+    // merged_pool.view()
+ 
+    // pool_bams.view()
+    def list = []
+    //pool.each {bam -> bam.view()}
+
+    // STRELKA_POOL(bams)
     //}
     //STRELKA(ELPREP.out.bams)
     // Annovar to annotate variatns

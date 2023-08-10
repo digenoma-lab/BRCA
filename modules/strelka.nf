@@ -20,10 +20,6 @@ process STRELKA_ONESAMPLE{
    tuple val("${sampleId}"), path("*variants.vcf.gz.tbi"), emit: vcf_tbi
    tuple val("${sampleId}"), path("*genome.vcf.gz")      , emit: genome_vcf
    tuple val("${sampleId}"), path("*genome.vcf.gz.tbi")  , emit: genome_vcf_tbi
-
-
-
-
 	script:
 	def prefix = "${sampleId}"
 
@@ -64,9 +60,9 @@ process STRELKA_ONESAMPLE{
 
 
 //Run strelka for a multiples samples using a pool!!!!
-/*
+
 process STRELKA_POOL{
-	tag "$sampleId-strelkaPool"
+	tag "$sample-strelkaPool"
 	publishDir "$params.outdir/strelkaPool", mode : "copy"
 
 
@@ -78,28 +74,23 @@ process STRELKA_POOL{
 
 	input:
 	//Input: bam files merged by mergedb process and preprocessed by elprep process
-	 tuple val(group), [ val(sampleId), file(preprocessed_bam), file(bai)]
+	val(bams)
+	val(sample)
 	output:
-   tuple val("${sampleId}"), path("*variants.vcf.gz")    , emit: vcf
-   tuple val("${sampleId}"), path("*variants.vcf.gz.tbi"), emit: vcf_tbi
-   tuple val("${sampleId}"), path("*genome.vcf.gz")      , emit: genome_vcf
-   tuple val("${sampleId}"), path("*genome.vcf.gz.tbi")  , emit: genome_vcf_tbi
-
-
-
+    tuple val("${sampleId}"), path("*variants.vcf.gz")    , emit: vcf
+    tuple val("${sampleId}"), path("*variants.vcf.gz.tbi"), emit: vcf_tbi
+    tuple val("${sampleId}"), path("*genome.vcf.gz")      , emit: genome_vcf
+    tuple val("${sampleId}"), path("*genome.vcf.gz.tbi")  , emit: genome_vcf_tbi
+	
 
 	script:
-	def prefix = "${sampleId}"
+	def prefix = "${sample}"
 	def samplesgroup=""
-	for(s in range) {
-   statement #1
-   statement #2
-   }
-
+	
 	if (params.debug == true){
 		"""
 		echo configureStrelkaGermlineWorkflow.py \\
-				--bam $preprocessed_bam \\
+				--bam ${bams} \\
 				--referenceFasta ${params.REFERENCE_FASTA} \\
 				--callRegions ${params.BRCA_POSITION} \\
 				--exome  \\
@@ -107,47 +98,16 @@ process STRELKA_POOL{
 
 		echo python strelka_germline/runWorkflow.py -m local -j $task.cpus
 		touch  ${prefix}.genome.vcf.gz ${prefix}.genome.vcf.gz.tbi ${prefix}.variants.vcf.gz ${prefix}.variants.vcf.gz.tbi
-
-
-		# configuration
-STRELKA_INSTALL_PATH=/home/adigenova/DiGenomaLab/projects/HRR/gene_focus_analisis/strelka-2.9.10.centos6_x86_64
-${STRELKA_INSTALL_PATH}/bin/configureStrelkaGermlineWorkflow.py \
-    --bam AL_S9.md.bam \
-    --bam DC_S14.md.bam \
-    --bam JC_S13.md.bam \
-    --bam JM_S12.md.bam \
-    --bam KV_S3.md.bam \
-    --bam LV_S2.md.bam \
-    --bam MC_S16.md.bam \
-    --bam ML_S10.md.bam \
-    --bam NS_S5.md.bam \
-    --bam PM_S15.md.bam \
-    --bam PP_S7.md.bam \
-    --bam PV_S1.md.bam \
-    --bam PZ_S8.md.bam \
-    --bam RQ_S6.md.bam \
-    --bam VM_S4.md.bam \
-    --bam YA_S11.md.bam \
-    --referenceFasta /home/adigenova/DiGenomaLab/databases/references/human/hs38DH.fa \
-    --exome \
-    --callRegions brca.bed.gz \
-    --runDir pool_germline
-# execution on a single local machine with 20 parallel jobs
-pool_germline/runWorkflow.py -m local -j 5
-
-
-
 		"""
 	}
 	else{
 		"""
 	 configureStrelkaGermlineWorkflow.py \\
-			 --bam $preprocessed_bam \\
+			 --bam ${bams} \\
 			 --referenceFasta ${params.REFERENCE_FASTA} \\
 			 --callRegions ${params.BRCA_POSITION} \\
 			 --exome  \\
 			 --runDir ./strelka_germline
-
 	 python strelka_germline/runWorkflow.py -m local -j $task.cpus
 	 mv strelka_germline/results/variants/genome.*.vcf.gz     ${prefix}.genome.vcf.gz
 	 mv strelka_germline/results/variants/genome.*.vcf.gz.tbi ${prefix}.genome.vcf.gz.tbi
@@ -158,4 +118,4 @@ pool_germline/runWorkflow.py -m local -j 5
 	}
 
 }
-*/
+
