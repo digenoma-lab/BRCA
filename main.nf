@@ -12,6 +12,7 @@ include {QUALIMAP} from './modules/qualimap'
 include {B2C} from './modules/b2c'
 include {STRELKA_ONESAMPLE} from './modules/strelka'
 include {STRELKA_POOL} from './modules/strelka'
+include {STRELKA_POOL_TWO} from './modules/strelka'
 include {ANNOVAR} from './modules/annovar'
 
 process PRINT_VERSIONS {
@@ -74,30 +75,8 @@ workflow {
     samples = ELPREP.out.bams.map {it -> [it[0]]}.collect().flatten()
     samples.view()
     STRELKA_POOL(bams, samples)
-  
-    
-    //ELPREP.out.bams.view()
-    // todo = samples.map{it -> tuple(it, samples)}
-    // todo.view()
-    // bams = ELPREP.out.bams.toList()
-    // bams.view()
-    // bams.view()
-    // ELPREP.out.bams.map{i->[i[0], bams]}set{pool}
-    // // pool.map{it -> [file(it[1])]}.set{pool_bams}
-    // pool.view()
-    // pool.map{ it -> [it[0], (pool_bams)]}.set{pool}
-    // pool.view()
- 
-    // merged_pool.view()
- 
-    // pool_bams.view()
-    def list = []
-    //pool.each {bam -> bam.view()}
-
-    // STRELKA_POOL(bams)
-    //}
-    //STRELKA(ELPREP.out.bams)
+    STRELKA_POOL_TWO(bams)
     // Annovar to annotate variatns
-    //ANNOVAR(STRELKA.out.variants)
+    ANNOVAR(STRELKA_POOL_TWO.out.vcf)
     //MULTIQC(all_files)
 }
