@@ -12,7 +12,7 @@ include {QUALIMAP} from './modules/qualimap'
 include {B2C} from './modules/b2c'
 include {STRELKA_ONESAMPLE} from './modules/strelka'
 include {STRELKA_POOL} from './modules/strelka'
-include {STRELKA_POOL_TWO} from './modules/strelka'
+include {BCFTOOLS_FILTER; BCFTOOLS_FILTER as BF} from './modules/bcftools'
 include {ANNOVAR} from './modules/annovar'
 
 process PRINT_VERSIONS {
@@ -64,19 +64,19 @@ workflow {
     QUALIMAP(ELPREP.out.bams)
     //BAM->CRAM conversion
     B2C(ELPREP.out.bams)
-
-
     // Strelka to call variants
     // ELPREP.out.bams.view()
     STRELKA_ONESAMPLE(ELPREP.out.bams)
-    // STRELKA_POOL(bams)
-
+    // we prepare samples for running strelka pool
     bams = ELPREP.out.bams.map {it -> it[1]}.collect()
-    samples = ELPREP.out.bams.map {it -> [it[0]]}.collect().flatten()
-    samples.view()
-    STRELKA_POOL(bams, samples)
-    STRELKA_POOL_TWO(bams)
+    bais = ELPREP.out.bams.map {it -> it[2]}.collect()
+    samples = ELPREP.out.bams.map {it -> [it[0]]}.collect()
+    STRELKA_POOL("pool",bams,bais)
     // Annovar to annotate variatns
-    ANNOVAR(STRELKA_POOL_TWO.out.vcf)
+    BCFTOOLS_FILTER(STRELKA_ONESAMPLE.out.vcf)
+    //we filter pool variants
+    BF(STRELKA_POOL.out.vcf)
+
+    //ANNOVAR(STRELKA_POOL.out.vcf)
     //MULTIQC(all_files)
 }
