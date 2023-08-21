@@ -27,8 +27,8 @@ process STRELKA_ONESAMPLE{
 		"""
 		echo configureStrelkaGermlineWorkflow.py \\
 				--bam $preprocessed_bam \\
-				--referenceFasta ${params.REFERENCE_FASTA} \\
-				--callRegions ${params.BRCA_POSITION} \\
+				--referenceFasta ${params.ref} \\
+				--callRegions ${params.brca_reg} \\
 				--exome  \\
 				--runDir ./strelka_germline
 
@@ -40,8 +40,8 @@ process STRELKA_ONESAMPLE{
 		"""
 	 configureStrelkaGermlineWorkflow.py \\
 			 --bam $preprocessed_bam \\
-			 --referenceFasta ${params.REFERENCE_FASTA} \\
-			 --callRegions ${params.BRCA_POSITION} \\
+			 --referenceFasta ${params.ref} \\
+			 --callRegions ${params.brca_reg} \\
 			 --exome  \\
 			 --runDir ./strelka_germline
 
@@ -98,8 +98,8 @@ process STRELKA_POOL{
 		"""
 		echo configureStrelkaGermlineWorkflow.py \\
 				${bamg} \\
-				--referenceFasta ${params.REFERENCE_FASTA} \\
-				--callRegions ${params.BRCA_POSITION} \\
+				--referenceFasta ${params.ref} \\
+				--callRegions ${params.brca_reg} \\
 				--exome  \\
 				--runDir ./strelka_germline
 
@@ -111,8 +111,8 @@ process STRELKA_POOL{
 		"""
 	 configureStrelkaGermlineWorkflow.py \\
 			${bamg} \\
-			 --referenceFasta ${params.REFERENCE_FASTA} \\
-			 --callRegions ${params.BRCA_POSITION} \\
+			 --referenceFasta ${params.ref} \\
+			 --callRegions ${params.brca_reg} \\
 			 --exome  \\
 			 --runDir ./strelka_germline
 	 python strelka_germline/runWorkflow.py -m local -j $task.cpus

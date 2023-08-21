@@ -20,7 +20,7 @@ process FASTQC {
     }   else{
     		"""
     		mkdir -p ${sampleId}-${part}.fastqc
-    		fastqc -t $task.cpus -o ${sampleId}-${part}.fastqc $reads
+    		fastqc -t $task.cpus -o ${sampleId}-${part}.fastqc $read1 $read2
     		"""
     }
 }
