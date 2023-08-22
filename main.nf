@@ -8,6 +8,7 @@ include {FASTQC} from './modules/fastqc'
 include {BWAMEM} from './modules/bwamem'
 include {MERGEB} from './modules/mergeb'
 include {ELPREP} from './modules/elprep'
+include {SAMTOOLS} from './modules/samtools'
 include {QUALIMAP} from './modules/qualimap'
 include {B2C} from './modules/b2c'
 include {STRELKA_ONESAMPLE} from './modules/strelka'
@@ -55,22 +56,22 @@ workflow {
     groups=BWAMEM.out.bams.groupTuple(by: 0)
 
     //groups.view()
-
     MERGEB(groups)
     //MERGEB.out.mbams.view()
     //bam procesisng sort/duplciates/bqrs
-    ELPREP(MERGEB.out.mbams)
+    //ELPREP(MERGEB.out.mbams)
+    SAMTOOLS(MERGEB.out.mbams)
     //Quality of alignments
-    QUALIMAP(ELPREP.out.bams)
+    QUALIMAP(SAMTOOLS.out.bams)
     //BAM->CRAM conversion
-    B2C(ELPREP.out.bams)
+    B2C(SAMTOOLS.out.bams)
     // Strelka to call variants
     // ELPREP.out.bams.view()
-    STRELKA_ONESAMPLE(ELPREP.out.bams)
+    STRELKA_ONESAMPLE(SAMTOOLS.out.bams)
     // we prepare samples for running strelka pool
-    bams = ELPREP.out.bams.map {it -> it[1]}.collect()
-    bais = ELPREP.out.bams.map {it -> it[2]}.collect()
-    samples = ELPREP.out.bams.map {it -> [it[0]]}.collect()
+    bams = SAMTOOLS.out.bams.map {it -> it[1]}.collect()
+    bais = SAMTOOLS.out.bams.map {it -> it[2]}.collect()
+    samples = SAMTOOLS.out.bams.map {it -> [it[0]]}.collect()
     STRELKA_POOL("pool",bams,bais)
     // Annovar to annotate variatns
     BCFTOOLS_FILTER(STRELKA_ONESAMPLE.out.vcf)
