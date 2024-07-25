@@ -1,4 +1,4 @@
-// Run deepVariant for a single sample
+// Run bcf to vcf
 process B2V{
 
 	cpus 2
@@ -8,7 +8,6 @@ process B2V{
 	publishDir "$params.outdir/deepvariant_pool", mode: "copy"
 
     container "docker://quay.io/biocontainers/bcftools:1.17--haef29d1_0"
-	containerOptions "-B /mnt/beegfs:/mnt/beegfs"
 
 	input:
 	//Input: bcf - glnexus output

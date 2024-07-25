@@ -9,7 +9,6 @@ process DEEPVARIANT_ONESAMPLE{
 	publishDir "$params.outdir/deepvariant_persample", mode: "copy"
 
     container "docker://google/deepvariant:1.6.1"
-	containerOptions "-B /mnt/beegfs:/mnt/beegfs"
 	
 	input:
 	//Input: bam files merged by mergedb process and preprocessed by elprep process

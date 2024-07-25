@@ -9,7 +9,6 @@ process GLNEXUS_DEEPVARIANT{
 	publishDir "$params.outdir/deepvariant_pool", mode: "copy"
 
     container "docker://quay.io/biocontainers/glnexus:1.4.1--h5c1b0a6_3"
-	containerOptions "-B /mnt/beegfs:/mnt/beegfs"
 
 	input:
 	//Input: gvcfs files - deepvariant outputs

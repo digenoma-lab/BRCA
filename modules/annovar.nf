@@ -17,7 +17,7 @@ process ANNOVAR{
     ${params.ANNOVAR_DB} -out ${sampleId}.${TOOL}.annovar_annot \
     -nastring . -vcfinput --buildver hg38 \
     -protocol ensGene,avsnp150,clinvar_20220320,gnomad40_genome,icgc28,intervar_20180118,dbnsfp42c,revel \
-    --codingarg -includesnp -operation g,f,f,f,f,f,f,f --remove --onetranscript 
+    --codingarg -includesnp -operation g,f,f,f,f,f,f,f --remove --onetranscript
     touch multianno.vcf multianno.txt
     """
 	}

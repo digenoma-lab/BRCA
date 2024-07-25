@@ -12,7 +12,6 @@ process QUALIMAP{
     path("${sampleId}.qualimap") , emit : qc
 
    container "/mnt/beegfs/home/efeliu/work2024/080524_nextflow_BRCA/BRCA/images/qualimap_2.2.1.sif"  // Ruta a la imagen Singularity
-   containerOptions "-B /mnt/beegfs:/mnt/beegfs"
 
     script:
     if(params.debug == true){

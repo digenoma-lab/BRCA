@@ -74,7 +74,6 @@ process STRELKA_POOL{
 	
     container "/mnt/beegfs/home/efeliu/work2024/080524_nextflow_BRCA/BRCA/images/strelka:2.9.10--h9ee0642_1"
 
-    containerOptions "-B /mnt/beegfs:/mnt/beegfs"
 	input:
 	//Input: bam files merged by mergedb process and preprocessed by elprep process
 	 val(sampleId)
