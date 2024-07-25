@@ -1,7 +1,0 @@
-sampleId,part,read1,read2
-S1,0,reads/S1.fwd.fq.gz,reads/S1.rev.fq.gz
-S1,1,reads/S1.1.fwd.fq.gz,reads/S1.1.rev.fq.gz
-S2,0,reads/S2.fwd.fq.gz,reads/S2.rev.fq.gz
-S3,0,reads/S3.fwd.fq.gz,reads/S3.rev.fq.gz
-S4,0,reads/S4.fwd.fq.gz,reads/S4.rev.fq.gz
-S5,0,reads/S5.fwd.fq.gz,reads/S5.rev.fq.gz

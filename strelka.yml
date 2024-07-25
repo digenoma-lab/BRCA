@@ -1,7 +1,0 @@
-name: strelka
-channels:
-  - defaults
-  - bioconda
-  - conda-forge
-dependencies:
-  - strelka2=2.9.10

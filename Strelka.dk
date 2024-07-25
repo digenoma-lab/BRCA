@@ -1,4 +1,0 @@
-FROM mambaorg/micromamba:1.4.6
-COPY --chown=$MAMBA_USER:$MAMBA_USER strelka.yml /tmp/strelka.yml
-RUN micromamba install -y  -f /tmp/strelka.yml && \
-    micromamba clean --all --yes
