@@ -1,6 +1,12 @@
 process FASTQC {
     tag "$sampleId-mem"
+    cpus 8
+    memory '10 GB'
+
     //label 'process_medium'
+    // -t $task.cpus
+    container "docker://quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0"
+
     publishDir "$params.outdir/QC/FASTQC", mode: "copy"
 
     input:
@@ -12,7 +18,7 @@ process FASTQC {
     script:
     	if(params.debug == true){
     		"""
-    		echo fastqc -o ${sampleId}-${part}.fastqc $read1 $read2
+    		echo fastqc --noextract -o ${sampleId}-${part}.fastqc $read1 $read2
     		mkdir -p ${sampleId}-${part}.fastqc
     		touch ${sampleId}-${part}.fastqc/report.fastqc
     
@@ -20,7 +26,7 @@ process FASTQC {
     }   else{
     		"""
     		mkdir -p ${sampleId}-${part}.fastqc
-    		fastqc -t $task.cpus -o ${sampleId}-${part}.fastqc $read1 $read2
+    		fastqc --noextract -o ${sampleId}-${part}.fastqc $read1 $read2
     		"""
     }
 }

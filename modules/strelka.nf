@@ -5,12 +5,13 @@ process STRELKA_ONESAMPLE{
 	tag "$sampleId-strelka"
 	publishDir "$params.outdir/strelka_persample", mode : "copy"
 
+     conda "bioconda::strelka=2.9.10"
+    //container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    //    'https://depot.galaxyproject.org/singularity/strelka:2.9.10--h9ee0642_1' :
+    //    'biocontainers/strelka:2.9.10--h9ee0642_1' }"
+    container "/mnt/beegfs/home/efeliu/work2024/080524_nextflow_BRCA/BRCA/images/strelka:2.9.10--h9ee0642_1"
 
-	conda "bioconda::strelka=2.9.10"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/strelka:2.9.10--h9ee0642_1' :
-        'biocontainers/strelka:2.9.10--h9ee0642_1' }"
-
+    containerOptions "-B /mnt/beegfs:/mnt/beegfs"
 
 	input:
 	//Input: bam files merged by mergedb process and preprocessed by elprep process
@@ -67,11 +68,13 @@ process STRELKA_POOL{
 
 
 	conda "bioconda::strelka=2.9.10"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/strelka:2.9.10--h9ee0642_1' :
-        'biocontainers/strelka:2.9.10--h9ee0642_1' }"
+    //container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    //    'https://depot.galaxyproject.org/singularity/strelka:2.9.10--h9ee0642_1' :
+    //    'biocontainers/strelka:2.9.10--h9ee0642_1' }"
+	
+    container "/mnt/beegfs/home/efeliu/work2024/080524_nextflow_BRCA/BRCA/images/strelka:2.9.10--h9ee0642_1"
 
-
+    containerOptions "-B /mnt/beegfs:/mnt/beegfs"
 	input:
 	//Input: bam files merged by mergedb process and preprocessed by elprep process
 	 val(sampleId)
@@ -89,7 +92,7 @@ process STRELKA_POOL{
 	script:
 	def prefix = "${sampleId}"
 	def samplesgroup=""
-  def bamg=""
+  	def bamg=""
 	for (b in bams){
 		bamg=bamg+" --bam $b"
 	}

@@ -11,16 +11,19 @@ process QUALIMAP{
     output:
     path("${sampleId}.qualimap") , emit : qc
 
+   container "/mnt/beegfs/home/efeliu/work2024/080524_nextflow_BRCA/BRCA/images/qualimap_2.2.1.sif"  // Ruta a la imagen Singularity
+   containerOptions "-B /mnt/beegfs:/mnt/beegfs"
+
     script:
     if(params.debug == true){
     	"""
-    	echo qualimap  bamqc  -bam $bam  -outdir ${sampleId}.qualimap --java-mem-size=30G -nt $task.cpus
+    	echo qualimap  bamqc  -gff ${params.brca_amp} -bam $bam  -outdir ${sampleId}.qualimap --java-mem-size=30G -nt $task.cpus
     	mkdir ${sampleId}.qualimap
     	touch ${sampleId}.qualimap/summaryQualimap.txt
     	"""
     }else{
     	"""
-    	qualimap  bamqc  -bam $bam  -outdir ${sampleId}.qualimap --java-mem-size=30G -nt $task.cpus
+    	qualimap  bamqc -gff ${params.brca_amp} -bam $bam -outdir ${sampleId}.qualimap --java-mem-size=30G -nt $task.cpus
     	"""
     }
     

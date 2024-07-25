@@ -13,8 +13,8 @@ process SAMTOOLS {
     input:
      tuple val(sampleId), file(bam)
     output:
-    tuple val("${sampleId}"), file("${sampleId}.md.bam"), file("${sampleId}.md.bam.bai"), emit: bams
-    path("${sampleId}.md.bam.bai") , emit : bindex
+    tuple val("${sampleId}"), file("${sampleId}.sort.bam"), file("${sampleId}.sort.bam.bai"), emit: bams
+    path("${sampleId}.sort.bam.bai") , emit : bindex
 
     script:
     if(params.debug == true){
@@ -31,9 +31,8 @@ process SAMTOOLS {
     	"""
         samtools view -Sb ${bam} | samtools fixmate -m  - ${sampleId}.fixmate.bam
         samtools view -Sb ${sampleId}.fixmate.bam | samtools sort -o ${sampleId}.sort.bam -
-        samtools markdup ${sampleId}.sort.bam ${sampleId}.md.bam
-        samtools index ${sampleId}.md.bam
-        rm -f ${sampleId}.fixmate.bam ${sampleId}.sort.bam
+        samtools index ${sampleId}.sort.bam
+        rm -f ${sampleId}.fixmate.bam
     	"""
     }
 }

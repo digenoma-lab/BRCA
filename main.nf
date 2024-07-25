@@ -14,7 +14,14 @@ include {B2C} from './modules/b2c'
 include {STRELKA_ONESAMPLE} from './modules/strelka'
 include {STRELKA_POOL} from './modules/strelka'
 include {BCFTOOLS_FILTER; BCFTOOLS_FILTER as BF} from './modules/bcftools'
-include {ANNOVAR} from './modules/annovar'
+include {ANNOVAR as ANNOVAR_DS} from './modules/annovar'
+include {ANNOVAR as ANNOVAR_DP} from './modules/annovar'
+include {ANNOVAR as ANNOVAR_SS} from './modules/annovar'
+include {ANNOVAR as ANNOVAR_SP} from './modules/annovar'
+include {MULTIQC} from './modules/multiqc'
+include {DEEPVARIANT_ONESAMPLE} from './modules/deepvariant'
+include	{GLNEXUS_DEEPVARIANT} from './modules/glnexus'
+include {B2V} from './modules/b2v'
 
 process PRINT_VERSIONS {
     publishDir "$params.outdir/software", mode: "copy"
@@ -29,9 +36,11 @@ process PRINT_VERSIONS {
     echo "qualimap: v.2.2.2-dev" >> versions.txt
     echo "Strelka: 2.9.10" >> versions.txt
     echo "Annovar: zzz" >> versions.txt
+    echo "MultiQC: xxx" >> versions.txt
+    echo "DeepVariant: 1.6.1" >> versions.txt 
+    echo "GLnexus: 1.4.1" >> versions.txt
     """
 }
-
 workflow {
     // TODO do a parameter check
     PRINT_VERSIONS()
@@ -45,39 +54,64 @@ workflow {
         println "Error: reads regex or path"
     }
 
-
-    //read_pairs_ch.view()
-    //ref = path(params.ref)
+    read_pairs_ch.view()
     //fastqc read quality
+
     FASTQC(read_pairs_ch)
     //read aligment alt/hla
     BWAMEM(read_pairs_ch)
+
     //we do merge the bams by sample ID
     groups=BWAMEM.out.bams.groupTuple(by: 0)
-
-    //groups.view()
     MERGEB(groups)
-    //MERGEB.out.mbams.view()
+    MERGEB.out.mbams.view()
+
     //bam procesisng sort/duplciates/bqrs
-    //ELPREP(MERGEB.out.mbams)
     SAMTOOLS(MERGEB.out.mbams)
+
     //Quality of alignments
+    SAMTOOLS.out.bams.view()
     QUALIMAP(SAMTOOLS.out.bams)
+
+
     //BAM->CRAM conversion
     B2C(SAMTOOLS.out.bams)
-    // Strelka to call variants
-    // ELPREP.out.bams.view()
+
+    //Strelka to call variants
     STRELKA_ONESAMPLE(SAMTOOLS.out.bams)
-    // we prepare samples for running strelka pool
+
+
+    //we prepare samples for running strelka pool
     bams = SAMTOOLS.out.bams.map {it -> it[1]}.collect()
     bais = SAMTOOLS.out.bams.map {it -> it[2]}.collect()
-    samples = SAMTOOLS.out.bams.map {it -> [it[0]]}.collect()
-    STRELKA_POOL("pool",bams,bais)
-    // Annovar to annotate variatns
+
+    STRELKA_POOL("Strelka",bams,bais)
     BCFTOOLS_FILTER(STRELKA_ONESAMPLE.out.vcf)
+
     //we filter pool variants
     BF(STRELKA_POOL.out.vcf)
 
-    //ANNOVAR(STRELKA_POOL.out.vcf)
-    //MULTIQC(all_files)
+    //DeepVariant to call variants - single sample
+    DEEPVARIANT_ONESAMPLE(SAMTOOLS.out.bams)
+
+
+    DEEPVARIANT_ONESAMPLE.out.gvcf.view()
+    gvcfs = DEEPVARIANT_ONESAMPLE.out.gvcf.map {it -> it[1]}.collect()
+    
+    // glnexus to merge variants - pool DeepVariants
+    GLNEXUS_DEEPVARIANT("DeepVariant",gvcfs)
+    GLNEXUS_DEEPVARIANT.out.bcf.view()
+
+    //bcf to vcf
+    B2V(GLNEXUS_DEEPVARIANT.out.bcf)
+
+    //Annotation with ANNOVAR
+    ANNOVAR_DP(B2V.out.vcf,"DP")
+    ANNOVAR_DS(DEEPVARIANT_ONESAMPLE.out.vcf,"DS")
+    ANNOVAR_SP(BF.out.vcf,"SP")
+    ANNOVAR_SS(BCFTOOLS_FILTER.out.vcf,"SS")
+
+    //MiltiQC for metrics
+    MULTIQC(baseDir)
+    
 }

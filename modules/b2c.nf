@@ -5,10 +5,10 @@ process B2C{
     publishDir "$params.outdir/CRAM", mode: "copy"
 
 
-    conda "bioconda::samtools=1.17"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-                'https://depot.galaxyproject.org/singularity/samtools:1.17--h00cdaf9_0' :
-                'biocontainers/samtools:1.17--h00cdaf9_0' }"
+   // conda "bioconda::samtools=1.17"
+   // container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+   //             'https://depot.galaxyproject.org/singularity/samtools:1.17--h00cdaf9_0' :
+   //             'biocontainers/samtools:1.17--h00cdaf9_0' }"
 
 
     input:
