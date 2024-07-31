@@ -1,6 +1,32 @@
 # BRCA
+
 A Nextflow pipeline for processing target NGS BRCA data
 
+## Nextflow Pipeline for BRCA Variant Calling Using Amplicon Illumina Data
+
+This documentation provides an overview of the Nextflow pipeline for variant calling on BRCA genes using amplicon Illumina data and instructions on how to use it.
+
+## Pipeline Overview
+
+The pipeline performs the following steps:
+
+1. **Quality Control**: Assess the quality of the sequencing reads using FastQC.
+2. **Read Alignment**: Align reads to the reference genome using BWA-MEM.
+3. **Merge BAM Files**: Merge aligned BAM files by sample ID.
+4. **BAM Processing**: Process BAM files (sorting, marking duplicates) using SAMtools and Elprep.
+5. **Quality Assessment**: Assess the quality of the alignments using Qualimap.
+6. **BAM to CRAM Conversion**: Convert BAM files to CRAM format.
+7. **Variant Calling**: Call variants using Strelka and DeepVariant.
+8. **Variant Filtering**: Filter variant calls using BCFtools.
+9. **Variant Annotation**: Annotate variants using ANNOVAR.
+10. **Quality Control Summary**: Generate a summary of QC metrics using MultiQC.
+
+## Instructions for Using the Pipeline
+
+### Prerequisites
+
+- Nextflow installed on your system.
+- Required bioinformatics tools installed (e.g., BWA, SAMtools, FastQC, etc.).
 
 ## Dry run
 
@@ -8,64 +34,55 @@ A Nextflow pipeline for processing target NGS BRCA data
 nextflow run main.nf --csv test.csv --debug true --outdir results 
 ```
 
+### Input Files
 
-## Input files
+Prepare a CSV file containing the paths to your input sequencing reads. The CSV file should have the following columns:
 
-Los siguientes archivos son relativos al cluster UOH.
+- `sampleId`: Unique identifier for each sample.
+- `part`: Part of the sample (e.g., replicate number).
+- `read1`: Path to the first read file.
+- `read2`: Path to the second read file.
 
-1. reads : /mnt/beegfs/home/adigenova/DiGenomaLab/HRR/gene_focus_analisis/reads
-2. reference genome : /mnt/beegfs/labs/DiGenomaLab/databases/references/human/hs38DH.fa 
-3. BRCA1/2 positions :  /mnt/beegfs/labs/DiGenomaLab/HRR/gene_focus_analisis/brca.bed.gz
-4. Annovar database : /mnt/beegfs/home/adigenova/DiGenomaLab/databases/annovar/hg38
-5. Annovar code : /mnt/beegfs/labs/DiGenomaLab/databases/annovar/annovar/table_annovar.pl  
+2. fasta of reference genome : hs38DH.fa 
+3. BRCA1/2 positions in bed format : brca.bed.gz
+4. Path to Annovar database : <path>/annovar/hg38
+5. Annovar code : <path>/annovar/table_annovar.pl  
 
 
 
-## Current pipeline
+### Running the Pipeline
 
-1. run the ***genome.mk*** makefile script which perform genome alignment, quality control, and post processing. 
-The batch script  ***run-genome-pipeline.sh*** under script directory is currently used to submit the job to the cluster.
+1. **Prepare Input Files**: Ensure your input files are in the correct format and paths are specified correctly in the CSV file.
 
-2. call variants using the following command 
-```
-# configuration
-STRELKA_INSTALL_PATH=/home/adigenova/DiGenomaLab/projects/HRR/gene_focus_analisis/strelka-2.9.10.centos6_x86_64
-${STRELKA_INSTALL_PATH}/bin/configureStrelkaGermlineWorkflow.py \
-    --bam AL_S9.md.bam \
-    --bam DC_S14.md.bam \
-    --bam JC_S13.md.bam \
-    --bam JM_S12.md.bam \
-    --bam KV_S3.md.bam \
-    --bam LV_S2.md.bam \
-    --bam MC_S16.md.bam \
-    --bam ML_S10.md.bam \
-    --bam NS_S5.md.bam \
-    --bam PM_S15.md.bam \
-    --bam PP_S7.md.bam \
-    --bam PV_S1.md.bam \
-    --bam PZ_S8.md.bam \
-    --bam RQ_S6.md.bam \
-    --bam VM_S4.md.bam \
-    --bam YA_S11.md.bam \
-    --referenceFasta /home/adigenova/DiGenomaLab/databases/references/human/hs38DH.fa \
-    --exome \
-    --callRegions brca.bed.gz \
-    --runDir pool_germline
-# execution on a single local machine with 20 parallel jobs
-pool_germline/runWorkflow.py -m local -j 5
-```
-3. Annotate the resulting variants using annovar with the following command:
+2. **Set Parameters**: Define the output directory and the path to the CSV file.
 
-```
-table_annovar.pl pool_germline/results/variants/variants.pass.vcf.gz 
-		<path>/databases/annovar/hg38 -out annovar_annot 
-		-nastring . -vcfinput --buildver hg38  
-		-protocol abraom,avsnp150,clinvar_20220320,dbnsfp42c,ensGene,esp6500siv2_all,exac03,gene4denovo201907,gnomad30_genome,hrcr1,icgc28,intervar_20180118,kaviar_20150923,ljb26_all,mcap,regsnpintron,revel 
-		--codingarg -includesnp -operation f,f,f,f,g,f,f,f,f,f,f,f,f,f,f,f,f   --remove --onetranscript
+3. **Execute Pipeline**: Run the pipeline using the following command:
+
+```bash
+nextflow run <path_to_pipeline.nf> --csv <path_to_input_csv> --outdir <output_directory>
 ```
 
-## Nextflow pipeline
-The idea is to build a nextflow pipeline to automatize all the above steps.
+Replace `<path_to_pipeline.nf>`, `<path_to_input_csv>`, and `<output_directory>` with your actual file paths and directory.
+
+### Example Command
+
+```bash
+nextflow run brca_variant_calling.nf --csv samples.csv --outdir results
+```
+
+This command runs the pipeline with the input samples specified in `samples.csv` and outputs the results to the `results` directory.
+
+### Output
+
+The pipeline generates various output files, including:
+
+- Quality control reports.
+- Aligned BAM/CRAM files.
+- Variant call files (VCF).
+- Filtered and annotated variant call files.
+- A summary report of quality metrics.
+
+### Developers
 
 
 
