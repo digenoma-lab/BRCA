@@ -1,43 +1,57 @@
 # BRCA
-A Nextflow pipeline for processing target NGS BRCA data
 
-#
-## Dry run
-```
-cd BRCA
-nextflow run main.nf -profile kutral --csv ../readsHRR_1-4.csv -params-file ../params-brca.yml -c nexflow.config
+Nextflow pipeline for clinical profiling of **BRCA1 and BRCA2** variants from targeted sequencing data.
+
+## Run pipeline
+
+```bash
+nextflow run main.nf \
+    -profile kutral \
+    --csv ../readsHRR_N83.csv \
+    -params-file params-brca.yml \
+    -c nextflow.config \
+    -resume
 ```
 
 ## Input files
 
-Los siguientes archivos son relativos al cluster UOH.
+Samples are provided through a CSV file using the `--csv` parameter.
 
+Pipeline parameters and reference files are defined in `params-brca.yml`.
+
+Example:
+
+```yaml
+dbsnp: /mnt/beegfs/labs/DiGenomaLab/databases/references/human/GATK_Bundle/Homo_sapiens_assembly38.dbsnp138.elsites
+dbindel: /mnt/beegfs/labs/DiGenomaLab/databases/references/human/GATK_Bundle/Mills_and_1000G_gold_standard.indels.hg38.elsites
+ref: /mnt/beegfs/labs/DiGenomaLab/databases/references/human/bwa2/hs38DH.fa
+elpre_ref: /mnt/beegfs/labs/DiGenomaLab/databases/references/human/hs38DH.fa.elfasta
+bqsr: true
+
+alt_js: /mnt/beegfs/home/efeliu/micromamba/envs/brca12/bin/bwa-postalt.js
+brca_reg: /mnt/beegfs/labs/DiGenomaLab/HRR/nextflow/brca.bed.gz
+brca_amp: /mnt/beegfs/home/efeliu/work2024/080524_nextflow_BRCA/AmpliSeq_BRCA_hg38_new.bed
+
+ANNOVAR_CODE: /mnt/beegfs/labs/DiGenomaLab/databases/annovar/annovar/table_annovar.pl
+ANNOVAR_DB: /mnt/beegfs/labs/DiGenomaLab/databases/annovar/hg38
 ```
-## Example params-brca.yml
-dbsnp: /databases/references/human/GATK_Bundle/Homo_sapiens_assembly38.dbsnp138.elsites
-dbindel: /databases/references/human/GATK_Bundle/Mills_and_1000G_gold_standard.indels.hg38.elsites
-ref: /references/human/bwa2/hs38DH.fa
-brca_reg: brca.bed.gz
-brca_amp: AmpliSeq_BRCA_hg38_new.bed
 
-ANNOVAR_CODE: annovar/table_annovar.pl
-ANNOVAR_DB: databases/annovar/hg38
-```
+## Pipeline
 
-## Current pipeline
+The workflow includes:
 
-1. run the ***genome.mk*** makefile script which perform genome alignment, quality control, and post processing. 
-The batch script  ***run-genome-pipeline.sh*** under script directory is currently used to submit the job to the cluster.
+1. Read alignment with **BWA-MEM**
+2. Quality control with **Qualimap**
+3. Germline variant calling with **DeepVariant** and **Strelka**
+4. Joint genotyping with **GLnexus**
+5. Variant preprocessing with **BCFtools**
+6. Variant annotation with **ANNOVAR**
+7. Clinical interpretation with **CPSR**
 
-2. call variants using the following command 
-```
-```
-3. Annotate the resulting variants using annovar with the following command:
+## Citation
 
+González E, Moreno Salinas R, Muñoz M, et al.  
+**A workflow for clinical profiling of BRCA genes in Chilean breast cancer patients via targeted sequencing.**  
+medRxiv (2024).
 
-## Nextflow pipeline
-The idea is to build a nextflow pipeline to automatize all the above steps.
-
-
-
-
+https://doi.org/10.1101/2024.09.25.24314295
