@@ -16,8 +16,8 @@ process ANNOVAR{
     perl ${params.ANNOVAR_CODE} ${variants} \
     ${params.ANNOVAR_DB} -out ${sampleId}.${TOOL}.annovar_annot \
     -nastring . -vcfinput --buildver hg38 \
-    -protocol ensGene,avsnp150,clinvar_20220320,gnomad40_genome,icgc28,intervar_20180118,dbnsfp42c,revel \
-    --codingarg -includesnp -operation g,f,f,f,f,f,f,f --remove --onetranscript
+    -protocol refGenee,avsnp150,clinvar_20240917,gnomad40_genome,icgc28,intervar_20180118,dbnsfp42c,revel \
+    --codingarg -includesnp -operation g,f,f,f,f,f,f,f --remove
     touch multianno.vcf multianno.txt
     """
 	}
@@ -26,8 +26,8 @@ process ANNOVAR{
     perl ${params.ANNOVAR_CODE} ${variants} \
     ${params.ANNOVAR_DB} -out ${sampleId}.${TOOL}.annovar_annot \
     -nastring . -vcfinput --buildver hg38 \
-    -protocol ensGene,avsnp150,clinvar_20220320,gnomad40_genome,icgc28,intervar_20180118,dbnsfp42c,revel \
-    --codingarg -includesnp -operation g,f,f,f,f,f,f,f --remove --onetranscript 
+    -protocol refGene,avsnp150,clinvar_20240917,gnomad40_genome,icgc28,intervar_20180118,dbnsfp42c,revel \
+    --codingarg -includesnp -operation g,f,f,f,f,f,f,f --remove
     """
 	}
 

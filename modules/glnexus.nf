@@ -1,9 +1,10 @@
 // Run GLnexus to merge deepvariants g.vcfs
 process GLNEXUS_DEEPVARIANT{
 
-	cpus 8
-	memory '40 GB'
-	clusterOptions = '--nodelist=SRV04'
+	cpus 20
+	memory '80 GB'
+	clusterOptions = '--nodelist=tokikura'
+	containerOptions "-B /mnt/beegfs:/mnt/beegfs"
 
 	tag "$sampleId-deepVariant"
 	publishDir "$params.outdir/deepvariant_pool", mode: "copy"

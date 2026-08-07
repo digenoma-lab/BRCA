@@ -3,15 +3,15 @@ process QUALIMAP{
     //label 'process_medium'
 
     publishDir "$params.outdir/QC/QUALIMAP", mode: "copy"
+    
+    //container "https://depot.galaxyproject.org/singularity/qualimap:2.2.2a--1"  // Ruta a la imagen Singularity
+    //containerOptions "-B /mnt/beegfs:/mnt/beegfs"
 
     input:
     tuple val(sampleId), file(bam), file(bai)
 
-
     output:
     path("${sampleId}.qualimap") , emit : qc
-
-   container "/mnt/beegfs/home/efeliu/work2024/080524_nextflow_BRCA/BRCA/images/qualimap_2.2.1.sif"  // Ruta a la imagen Singularity
 
     script:
     if(params.debug == true){

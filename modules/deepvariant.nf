@@ -1,14 +1,16 @@
 // Run deepVariant for a single sample
 process DEEPVARIANT_ONESAMPLE{    
 	
-	cpus 8
-	memory '20 GB'
-	clusterOptions = '--nodelist=SRV04'
+	cpus 10
+	memory '30 GB'
+	clusterOptions = '--nodelist=tokikura'
+	containerOptions "-B /mnt/beegfs:/mnt/beegfs"
+
 
 	tag "$sampleId-deepVariant"
 	publishDir "$params.outdir/deepvariant_persample", mode: "copy"
 
-    container "docker://google/deepvariant:1.6.1"
+    	container "docker://google/deepvariant:1.6.1"
 	
 	input:
 	//Input: bam files merged by mergedb process and preprocessed by elprep process
