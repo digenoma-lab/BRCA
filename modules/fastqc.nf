@@ -1,11 +1,5 @@
 process FASTQC {
     tag "$sampleId-mem"
-    cpus 8
-    memory '10 GB'
-
-    //label 'process_medium'
-    // -t $task.cpus
-    container "docker://quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0"
 
     publishDir "$params.outdir/QC/FASTQC", mode: "copy"
 

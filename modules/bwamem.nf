@@ -6,8 +6,6 @@ process BWAMEM {
     publishDir "$params.outdir/BWA", mode: "copy", pattern: '*.log.*'
     publishDir "$params.outdir/BWA/HLA", mode: "copy", pattern: '*.hla.all'
 
-	//container "community.wave.seqera.io/library/bwa-mem2_bwakit_k8:c7c6b04074cfc362"
-
     input:
     tuple val(sampleId), val(part), file(read1), file(read2)
 

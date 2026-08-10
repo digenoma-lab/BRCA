@@ -7,7 +7,7 @@ Nextflow pipeline for clinical profiling of **BRCA1 and BRCA2** variants from ta
 ```bash
 nextflow run main.nf \
     -profile kutral \
-    --csv ../readsHRR_N83.csv \
+    --csv example_input.csv \
     -params-file params-brca.yml \
     -c nextflow.config \
     -resume
@@ -17,6 +17,14 @@ nextflow run main.nf \
 
 Samples are provided through a CSV file using the `--csv` parameter.
 
+```bash
+head example_input.csv
+sampleId,part,read1,read2
+17,0,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/17_S1.R1.fastq.gz,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/17_S1.R2.fastq.gz
+18,0,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/18_S2.R1.fastq.gz,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/18_S2.R2.fastq.gz
+20,0,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/20_S3.R1.fastq.gz,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/20_S3.R2.fastq.gz
+21,0,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/21_S4.R1.fastq.gz,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/21_S4.R2.fastq.gz
+```
 Pipeline parameters and reference files are defined in `params-brca.yml`.
 
 Example:
@@ -34,6 +42,12 @@ brca_amp: /mnt/beegfs/home/efeliu/work2024/080524_nextflow_BRCA/AmpliSeq_BRCA_hg
 
 ANNOVAR_CODE: /mnt/beegfs/labs/DiGenomaLab/databases/annovar/annovar/table_annovar.pl
 ANNOVAR_DB: /mnt/beegfs/labs/DiGenomaLab/databases/annovar/hg38
+
+panel_id: custom
+#panel_id: 10 Familial breast cancer
+custom_list: assets/brca_panel.tsv
+custom_list_name: BRCA1_BRCA2
+genome_assembly: grch38
 ```
 
 ## Pipeline

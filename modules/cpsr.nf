@@ -2,7 +2,9 @@ process CPSR {
     tag "$sample_id"
     label 'cpsr'
 
-    containerOptions "--bind ${params.vep_dir}:${params.vep_dir},${params.refdata_dir}:${params.refdata_dir}"
+    containerOptions "--bind ${params.vep_dir}:${params.vep_dir},${params.refdata_dir}:${params.refdata_dir}" +
+        (params.panel_id == 'custom' ? ",${file(params.custom_list).parent}:${file(params.custom_list).parent}" : "")
+
     publishDir "${params.outdir}/cpsr/${sample_id}", mode: 'copy'
 
     input:
@@ -18,14 +20,17 @@ process CPSR {
     def gwas_findings_arg = params.gwas_findings ? '--gwas_findings' : ''
     def classify_all_arg = params.classify_all ? '--classify_all' : ''
     def force_overwrite_arg = params.force_overwrite ? '--force_overwrite' : ''
+    def panel_arg = params.panel_id == 'custom' ?
+        "--custom_list \"${params.custom_list}\" --custom_list_name \"${params.custom_list_name}\"" :
+        "--panel_id \"${params.panel_id}\""
     """
+
     set -euo pipefail
 
     export HOME="\$PWD"
     export XDG_CACHE_HOME="\$PWD/.cache"
     export DENO_DIR="\$PWD/.cache/deno"
     export QUARTO_CACHE_DIR="\$PWD/.cache/quarto"
-
     mkdir -p "\$XDG_CACHE_HOME" "\$DENO_DIR" "\$QUARTO_CACHE_DIR"
 
     cpsr \\
@@ -34,7 +39,7 @@ process CPSR {
         --refdata_dir "${params.refdata_dir}" \\
         --output_dir "." \\
         --genome_assembly "${params.genome_assembly}" \\
-        --panel_id "${params.panel_id}" \\
+        ${panel_arg} \\
         --sample_id "${sample_id}" \\
         ${clinvar_report_noncancer_arg} \\
         ${secondary_findings_arg} \\

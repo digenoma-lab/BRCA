@@ -107,15 +107,15 @@ workflow {
     //MiltiQC for metrics
     //MULTIQC(baseDir)
 
-    BCFTOOLS_PREPROCESS(vcf_inputs)
+    //BCFTOOLS_PREPROCESS(vcf_inputs)
     
-    def filtered_vcfs = BCFTOOLS_PREPROCESS.out
+    //def filtered_vcfs = BCFTOOLS_PREPROCESS.out
 
-    if (params.panmask_filter) {
-        PANMASK_FILTER(BCFTOOLS_PREPROCESS.out.map { sample_id, input_vcf, input_vcf_index -> tuple(sample_id, input_vcf, input_vcf_index, panmask_bed) })
-        filtered_vcfs = PANMASK_FILTER.out
-    }
-    CPSR(filtered_vcfs)
+   // if (params.panmask_filter) {
+   //     PANMASK_FILTER(BCFTOOLS_PREPROCESS.out.map { sample_id, input_vcf, input_vcf_index -> tuple(sample_id, input_vcf, input_vcf_index, panmask_bed) })
+   //     filtered_vcfs = PANMASK_FILTER.out
+    //}
+    //CPSR(filtered_vcfs)
 
     
 }
