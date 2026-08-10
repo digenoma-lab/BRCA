@@ -1,15 +1,10 @@
 // Run GLnexus to merge deepvariants g.vcfs
 process GLNEXUS_DEEPVARIANT{
 
-	cpus 20
-	memory '80 GB'
-	clusterOptions = '--nodelist=tokikura'
-	containerOptions "-B /mnt/beegfs:/mnt/beegfs"
-
 	tag "$sampleId-deepVariant"
 	publishDir "$params.outdir/deepvariant_pool", mode: "copy"
 
-    container "docker://quay.io/biocontainers/glnexus:1.4.1--h5c1b0a6_3"
+    //container "docker://quay.io/biocontainers/glnexus:1.4.1--h5c1b0a6_3"
 
 	input:
 	//Input: gvcfs files - deepvariant outputs
