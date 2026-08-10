@@ -2,6 +2,10 @@
 
 Nextflow pipeline for clinical profiling of **BRCA1 and BRCA2** variants from targeted sequencing data.
 
+**BRCA** is a Nextflow pipeline for the clinical profiling of germline variants in **BRCA1** and **BRCA2** from targeted sequencing (AmpliSeq) data.
+Starting from paired-end FASTQ reads, the pipeline performs alignment, germline variant calling and filtering, functional annotation, and generates an interpreted clinical report (HTML/Excel) with variant classification according to ACMG/AMP criteria, ready for review by the clinical team.
+The pipeline runs reproducibly via Singularity containers and is designed for execution on an HPC cluster via Slurm.
+
 ## Run pipeline
 
 ```bash
@@ -25,6 +29,7 @@ sampleId,part,read1,read2
 20,0,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/20_S3.R1.fastq.gz,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/20_S3.R2.fastq.gz
 21,0,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/21_S4.R1.fastq.gz,/mnt/beegfs/labs/DiGenomaLab/HRR/reads/21_S4.R2.fastq.gz
 ```
+
 Pipeline parameters and reference files are defined in `params-brca.yml`.
 
 Example:
