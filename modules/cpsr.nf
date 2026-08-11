@@ -1,14 +1,12 @@
 process CPSR {
     tag "$sample_id"
-    label 'cpsr'
-
-    containerOptions "--bind ${params.vep_dir}:${params.vep_dir},${params.refdata_dir}:${params.refdata_dir}" +
-        (params.panel_id == 'custom' ? ",${file(params.custom_list).parent}:${file(params.custom_list).parent}" : "")
+    label 'CPSR'
 
     publishDir "${params.outdir}/cpsr/${sample_id}", mode: 'copy'
 
     input:
-    tuple val(sample_id), path(input_vcf), path(input_vcf_index)
+    tuple val(sample_id), val(caller), path(input_vcf), path(input_vcf_index)
+
 
     output:
     path "${sample_id}.cpsr.${params.genome_assembly}*"

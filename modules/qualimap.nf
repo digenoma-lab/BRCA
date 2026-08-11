@@ -5,7 +5,6 @@ process QUALIMAP{
     publishDir "$params.outdir/QC/QUALIMAP", mode: "copy"
     
     //container "https://depot.galaxyproject.org/singularity/qualimap:2.2.2a--1"  // Ruta a la imagen Singularity
-    //containerOptions "-B /mnt/beegfs:/mnt/beegfs"
 
     input:
     tuple val(sampleId), file(bam), file(bai)

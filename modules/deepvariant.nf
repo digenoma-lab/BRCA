@@ -1,10 +1,5 @@
 // Run deepVariant for a single sample
 process DEEPVARIANT_ONESAMPLE{    
-	
-	cpus 10
-	memory '30 GB'
-	clusterOptions = '--nodelist=tokikura'
-	containerOptions "-B /mnt/beegfs:/mnt/beegfs"
 
 
 	tag "$sampleId-deepVariant"

@@ -4,20 +4,15 @@ process BCFTOOLS_FILTER {
     tag "$meta"
     publishDir "$params.outdir/BCFTOOLS", mode: "copy"
 
-    conda "bioconda::bcftools=1.17"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/bcftools:1.17--haef29d1_0':
-        'biocontainers/bcftools:1.17--haef29d1_0' }"
-
     input:
     tuple val(meta), path(vcf)
 
     output:
-    tuple val(meta), path("*.${extension}"), emit: vcf
+    tuple val(meta), path("*.${extension}"), path("*.${extension}.tbi"), emit: vcf_tbi
     path  "versions.yml"                   , emit: versions
 
     script:
-    def args = task.ext.args ?: '-f PASS'
+    def args = task.ext.args ?: '-f PASS --output-type z'
     def prefix = task.ext.prefix ?: "${meta}.pass"
 
     extension = args.contains("--output-type b") || args.contains("-Ob") ? "bcf.gz" :
@@ -44,6 +39,9 @@ process BCFTOOLS_FILTER {
         --threads ${task.cpus} \\
         $args \\
         $vcf
+        
+    bcftools index --tbi ${prefix}.${extension}
+
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -51,4 +49,24 @@ process BCFTOOLS_FILTER {
     END_VERSIONS
     """
     }
+}
+
+process TABIX {
+    tag "$meta"
+    publishDir "$params.outdir/TABIX", mode: "copy"
+
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/tabix:1.11--hdfd78af_0':
+        'biocontainers/tabix:1.11--hdfd78af_0' }"
+
+    input:
+    tuple val(meta), path(vcf)
+
+    output:
+    tuple val(meta), path(vcf), path("*.tbi"), emit: vcf_tbi
+
+    script:
+    """
+    tabix -p vcf ${vcf}
+    """
 }

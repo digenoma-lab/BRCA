@@ -4,16 +4,35 @@ ref: /mnt/beegfs/labs/DiGenomaLab/databases/references/human/bwa2/hs38DH.fa
 elpre_ref: /mnt/beegfs/labs/DiGenomaLab/databases/references/human/hs38DH.fa.elfasta
 bqsr: true
 
+outdir: "../HRR_RunBRCA"
+
 alt_js: /opt/conda/bin/bwa-postalt.js
 brca_reg: /mnt/beegfs/labs/DiGenomaLab/HRR/nextflow/brca.bed.gz
-brca_amp: /mnt/beegfs/home/efeliu/work2024/080524_nextflow_BRCA/AmpliSeq_BRCA_hg38_new.bed
- 
-ANNOVAR_CODE: /mnt/beegfs/labs/DiGenomaLab/databases/annovar/annovar/table_annovar.pl
-ANNOVAR_DB: /mnt/beegfs/labs/DiGenomaLab/databases/annovar/hg38
+brca_amp: /mnt/beegfs/labs/DiGenomaLab/HRR/080524_nextflow_BRCA/AmpliSeq_BRCA_hg38_new.bed
 
-## CPSR
+# --- CPSR ---
 panel_id: custom
 #panel_id: 10 Familial breast cancer
-custom_list: assets/brca_panel.tsv
+custom_list: /mnt/beegfs/labs/DiGenomaLab/HRR/080524_nextflow_BRCA/BRCA/assets/brca_panel.tsv
 custom_list_name: BRCA1_BRCA2
 genome_assembly: grch38
+
+# --- Alineamiento (BWAMEM) ---
+aligner: bwa-mem2
+debug: false
+hla: false
+alt: false
+
+# --- CPSR: opciones de clasificación ---
+clinvar_report_noncancer: true
+secondary_findings: true
+pgx_findings: true
+gwas_findings: true
+classify_all: true
+force_overwrite: true
+pop_gnomad: amr    # revisa contra --help de tu build de CPSR/refdata si el nombre exacto difiere
+maf_upper_threshold: 0.2          # default de CPSR
+
+# --- CPSR: rutas requeridas (completar) ---
+vep_dir: /mnt/beegfs/labs/DiGenomaLab/databases/VEP/cache
+refdata_dir: /mnt/beegfs/labs/DiGenomaLab/databases/PCGR/databases

@@ -13,14 +13,14 @@ include {B2C} from './modules/b2c'
 include {STRELKA_ONESAMPLE} from './modules/strelka'
 include {STRELKA_POOL} from './modules/strelka'
 include {BCFTOOLS_FILTER; BCFTOOLS_FILTER as BF} from './modules/bcftools'
-//include {ANNOVAR as ANNOVAR_DS} from './modules/annovar'
-//include {ANNOVAR as ANNOVAR_DP} from './modules/annovar'
-//include {ANNOVAR as ANNOVAR_SS} from './modules/annovar'
-//include {ANNOVAR as ANNOVAR_SP} from './modules/annovar'
 include {MULTIQC} from './modules/multiqc'
 include {DEEPVARIANT_ONESAMPLE} from './modules/deepvariant'
 include	{GLNEXUS_DEEPVARIANT} from './modules/glnexus'
 include {B2V} from './modules/b2v'
+include {TABIX as TABIX_STRELKA} from './modules/bcftools'
+include {TABIX as TABIX_DEEPVARIANT} from './modules/bcftools'
+include {CPSR as CPSR_STRELKA} from './modules/cpsr'
+include {CPSR as CPSR_DEEPVARIANT} from './modules/cpsr'
 
 process PRINT_VERSIONS {
     publishDir "$params.outdir/software", mode: "copy"
@@ -99,17 +99,13 @@ workflow {
     B2V(GLNEXUS_DEEPVARIANT.out.bcf)
 
     //MiltiQC for metrics
-    //MULTIQC(baseDir)
+    MULTIQC(baseDir)
 
-    //BCFTOOLS_PREPROCESS(vcf_inputs)
+    // ---- CPSR: solo callers single-sample ----
+    strelka_single_ch = BCFTOOLS_FILTER.out.vcf_tbi
+        .map { meta, vcf, tbi -> tuple("sample-${meta}", "strelka", vcf, tbi) }
     
-    //def filtered_vcfs = BCFTOOLS_PREPROCESS.out
-
-    // if (params.panmask_filter) {
-    // PANMASK_FILTER(BCFTOOLS_PREPROCESS.out.map { sample_id, input_vcf, input_vcf_index -> tuple(sample_id, input_vcf, input_vcf_index, panmask_bed) })
-    // filtered_vcfs = PANMASK_FILTER.out
-    //}
-    CPSR(filtered_vcfs)
-
+    CPSR_STRELKA(strelka_single_ch)
+    
     
 }
