@@ -99,7 +99,7 @@ workflow {
     B2V(GLNEXUS_DEEPVARIANT.out.bcf)
 
     //MiltiQC for metrics
-    MULTIQC(baseDir)
+    //MULTIQC(baseDir)
 
     // ---- CPSR: solo callers single-sample ----
     strelka_single_ch = BCFTOOLS_FILTER.out.vcf_tbi

@@ -33,6 +33,10 @@ force_overwrite: true
 pop_gnomad: amr    # revisa contra --help de tu build de CPSR/refdata si el nombre exacto difiere
 maf_upper_threshold: 0.2          # default de CPSR
 
-# --- CPSR: rutas requeridas (completar) ---
+# --- CPSR  ---
 vep_dir: /mnt/beegfs/labs/DiGenomaLab/databases/VEP/cache
 refdata_dir: /mnt/beegfs/labs/DiGenomaLab/databases/PCGR/databases
+
+# --- PANMASK  ---
+panmask_filter: true
+panmask_bed: /mnt/beegfs/labs/DiGenomaLab/CANCER/BREAST/WGS/analysis/N100_BRCA_WGS/4_variants/gannot/assets/panmask/hg38.pm151b-v3.easy.bed.gz
