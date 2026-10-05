@@ -17,8 +17,8 @@ include {MULTIQC} from './modules/multiqc'
 include {DEEPVARIANT_ONESAMPLE} from './modules/deepvariant'
 include	{GLNEXUS_DEEPVARIANT} from './modules/glnexus'
 include {B2V} from './modules/b2v'
-include {TABIX as TABIX_STRELKA} from './modules/bcftools'
-include {TABIX as TABIX_DEEPVARIANT} from './modules/bcftools'
+include {PANMASK_FILTER as PANMASK_STRELKA} from './modules/panmask'
+include {PANMASK_FILTER as PANMASK_DEEPVARIANT} from './modules/panmask'
 include {CPSR as CPSR_STRELKA} from './modules/cpsr'
 include {CPSR as CPSR_DEEPVARIANT} from './modules/cpsr'
 
@@ -102,10 +102,22 @@ workflow {
     //MULTIQC(baseDir)
 
     // ---- CPSR: solo callers single-sample ----
-    strelka_single_ch = BCFTOOLS_FILTER.out.vcf_tbi
+    /*strelka_single_ch = BCFTOOLS_FILTER.out.vcf_tbi
         .map { meta, vcf, tbi -> tuple("sample-${meta}", "strelka", vcf, tbi) }
     
+    CPSR_STRELKA(strelka_single_ch)*/
+
+    panmask_bed_file = file(params.panmask_bed)
+
+    // Strelka
+    strelka_panmask_in = BCFTOOLS_FILTER.out.vcf_tbi
+        .map { meta, vcf, tbi -> tuple("sample-${meta}", vcf, tbi, panmask_bed_file) }
+    PANMASK_STRELKA(strelka_panmask_in)
+
+    strelka_single_ch = PANMASK_STRELKA.out
+        .map { meta, vcf, tbi -> tuple(meta, "strelka", vcf, tbi) }
     CPSR_STRELKA(strelka_single_ch)
+
     
     
 }

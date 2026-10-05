@@ -64,7 +64,7 @@ The workflow includes:
 3. Germline variant calling with **DeepVariant** and **Strelka**
 4. Joint genotyping with **GLnexus**
 5. Variant preprocessing with **BCFtools**
-6. Variant annotation with **ANNOVAR**
+6. Variant annotation with **VEP**
 7. Clinical interpretation with **CPSR**
 
 ## Citation
